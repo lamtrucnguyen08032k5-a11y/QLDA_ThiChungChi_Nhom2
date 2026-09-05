@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.sinhvien')
 @section('title', 'Làm bài thi')
 @section('content')
 <div class="alert alert-info d-flex justify-content-between">

@@ -25,6 +25,7 @@ use App\Http\Controllers\SinhVien\DangKyThiController;
 use App\Http\Controllers\SinhVien\DashboardController as SvDashboardController;
 use App\Http\Controllers\SinhVien\KetQuaController as SvKetQuaController;
 use App\Http\Controllers\SinhVien\PhucKhaoController as SvPhucKhaoController;
+use App\Http\Controllers\SinhVien\ThanhToanController;
 use App\Http\Controllers\SinhVien\ThiController;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/dang-xuat', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
+
+// Điểm trả về (return URL) từ cổng thanh toán VNPAY sau khi sinh viên thanh toán lệ phí thi.
+// Đặt ngoài middleware 'auth' vì đây là redirect từ máy chủ VNPAY, không phải request nội bộ.
+Route::get('/thanh-toan/vnpay/return', [ThanhToanController::class, 'vnpayReturn'])->name('sinhvien.dangky.thanhtoan.vnpay.return');
 
 /*
 |--------------------------------------------------------------------------
@@ -87,10 +92,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('de-thi/{dethi}/import', [DeThiController::class, 'importQuestions'])->name('dethi.import');
     Route::delete('de-thi/{dethi}/cau-hoi/{cauhoi}', [DeThiController::class, 'destroyQuestion'])->name('dethi.cauhoi.destroy');
 
-    // M4: Đăng ký thi - duyệt/từ chối
+    // M4: Đăng ký thi - duyệt/yêu cầu bổ sung/từ chối
     Route::get('lich-thi/{lichthi}/dang-ky', [AdminDangKyController::class, 'index'])->name('dangky.index');
     Route::post('lich-thi/{lichthi}/dang-ky/{dangky}/duyet', [AdminDangKyController::class, 'approve'])->name('dangky.approve');
     Route::post('lich-thi/{lichthi}/dang-ky/{dangky}/tu-choi', [AdminDangKyController::class, 'reject'])->name('dangky.reject');
+    Route::post('lich-thi/{lichthi}/dang-ky/{dangky}/bo-sung', [AdminDangKyController::class, 'yeuCauBoSung'])->name('dangky.bosung');
 
     // M5: Tổ chức thi
     Route::get('to-chuc-thi', [ToChucThiController::class, 'index'])->name('tochuc.index');
@@ -151,9 +157,17 @@ Route::middleware(['auth', 'role:giangvien'])->prefix('giang-vien')->name('giang
 Route::middleware(['auth', 'role:sinhvien'])->prefix('sinh-vien')->name('sinhvien.')->group(function () {
     Route::get('/', [SvDashboardController::class, 'index'])->name('dashboard');
 
-    // M4
+    // M4 - Đăng ký thi: Bước 1 Thông tin -> Bước 2 Xác nhận -> Bước 3 Thanh toán -> Bước 4 Trạng thái
     Route::get('/dang-ky-thi', [DangKyThiController::class, 'index'])->name('dangky.index');
-    Route::post('/dang-ky-thi/{lichthi}', [DangKyThiController::class, 'store'])->name('dangky.store');
+    Route::get('/dang-ky-thi/{lichthi}/buoc-1', [DangKyThiController::class, 'buoc1'])->name('dangky.buoc1');
+    Route::post('/dang-ky-thi/{lichthi}/buoc-1', [DangKyThiController::class, 'luuBuoc1'])->name('dangky.buoc1.luu');
+    Route::get('/dang-ky-thi/{lichthi}/buoc-2', [DangKyThiController::class, 'buoc2'])->name('dangky.buoc2');
+    Route::post('/dang-ky-thi/{lichthi}/buoc-2', [DangKyThiController::class, 'xacNhanBuoc2'])->name('dangky.buoc2.xacnhan');
+    Route::get('/dang-ky-thi/thanh-toan/{dangky}', [ThanhToanController::class, 'chon'])->name('dangky.buoc3');
+    Route::post('/dang-ky-thi/thanh-toan/{dangky}', [ThanhToanController::class, 'khoiTao'])->name('dangky.buoc3.khoitao');
+    Route::get('/dang-ky-thi/thanh-toan/{dangky}/mo-phong', [ThanhToanController::class, 'moPhong'])->name('dangky.thanhtoan.mophong');
+    Route::post('/dang-ky-thi/thanh-toan/{dangky}/mo-phong', [ThanhToanController::class, 'xuLyMoPhong'])->name('dangky.thanhtoan.mophong.xuly');
+    Route::get('/dang-ky-thi/trang-thai/{dangky}', [DangKyThiController::class, 'buoc4'])->name('dangky.buoc4');
     Route::get('/dang-ky-cua-toi', [DangKyThiController::class, 'cuaToi'])->name('dangky.cua-toi');
     Route::post('/dang-ky/{dangky}/huy', [DangKyThiController::class, 'huy'])->name('dangky.huy');
 

@@ -10,6 +10,7 @@
     <select name="trang_thai" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
         <option value="">-- Tất cả trạng thái --</option>
         <option value="cho_duyet" {{ request('trang_thai') === 'cho_duyet' ? 'selected' : '' }}>Chờ duyệt</option>
+        <option value="cho_bo_sung" {{ request('trang_thai') === 'cho_bo_sung' ? 'selected' : '' }}>Yêu cầu bổ sung</option>
         <option value="da_duyet" {{ request('trang_thai') === 'da_duyet' ? 'selected' : '' }}>Đã duyệt</option>
         <option value="tu_choi" {{ request('trang_thai') === 'tu_choi' ? 'selected' : '' }}>Từ chối</option>
         <option value="da_huy" {{ request('trang_thai') === 'da_huy' ? 'selected' : '' }}>Đã huỷ</option>
@@ -33,6 +34,7 @@
                         @csrf
                         <button class="btn btn-sm btn-success">Duyệt</button>
                     </form>
+                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#boSung{{ $dk->id }}">Yêu cầu bổ sung</button>
                     <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#tuChoi{{ $dk->id }}">Từ chối</button>
                     <div class="modal fade" id="tuChoi{{ $dk->id }}">
                         <div class="modal-dialog">
@@ -45,6 +47,30 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
                                     <button class="btn btn-danger">Xác nhận từ chối</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="boSung{{ $dk->id }}">
+                        <div class="modal-dialog">
+                            <form method="POST" action="{{ route('admin.dangky.bosung', [$lichthi, $dk]) }}" class="modal-content">
+                                @csrf
+                                <div class="modal-body">
+                                    <label class="form-label">Các trường cần bổ sung</label>
+                                    @foreach (['so_dien_thoai'=>'Số điện thoại','ngay_sinh'=>'Ngày sinh','gioi_tinh'=>'Giới tính','dan_toc'=>'Dân tộc','noi_sinh'=>'Nơi sinh','so_cccd'=>'Số CCCD','anh_cccd_truoc'=>'Ảnh CCCD mặt trước','anh_cccd_sau'=>'Ảnh CCCD mặt sau','anh_ho_so'=>'Ảnh hồ sơ dự thi 4x6','anh_the_sv'=>'Ảnh thẻ sinh viên'] as $key => $nhan)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="truong_can_bo_sung[]" value="{{ $key }}" id="ts_{{ $dk->id }}_{{ $key }}">
+                                            <label class="form-check-label small" for="ts_{{ $dk->id }}_{{ $key }}">{{ $nhan }}</label>
+                                        </div>
+                                    @endforeach
+                                    <label class="form-label mt-2">Lý do / nội dung cần bổ sung</label>
+                                    <textarea name="ly_do_bo_sung" class="form-control" required></textarea>
+                                    <label class="form-label mt-2">Thời hạn bổ sung trực tuyến</label>
+                                    <input type="datetime-local" name="han_bo_sung" class="form-control" required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                                    <button class="btn btn-warning">Gửi yêu cầu bổ sung</button>
                                 </div>
                             </form>
                         </div>

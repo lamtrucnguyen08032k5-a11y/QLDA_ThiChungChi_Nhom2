@@ -5,18 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Hệ thống thi chứng chỉ HVNH')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { min-height: 100vh; }
-        .sidebar { min-height: 100vh; background: #0d2b4e; }
-        .sidebar a { color: #cfe0f5; text-decoration: none; display: block; padding: .6rem 1rem; border-radius: .375rem; }
-        .sidebar a.active, .sidebar a:hover { background: #133b6b; color: #fff; }
-        .sidebar .brand { color: #fff; font-weight: 700; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: .5rem;}
-    </style>
+    <link href="{{ asset('css/theme.css') }}" rel="stylesheet">
+    <style> body { min-height: 100vh; } </style>
 </head>
 <body>
 <div class="d-flex">
     <nav class="sidebar" style="width:250px;">
-        <div class="brand">HVNH Khảo thí</div>
+        <div class="brand">
+            <img src="{{ asset('images/logo.svg') }}" alt="Logo" width="30" height="33">
+            <span>HVNH Khảo thí</span>
+        </div>
         <div class="px-2">
             @php $u = auth()->user(); @endphp
             @if ($u->role === 'admin')
@@ -49,7 +47,7 @@
     </nav>
     <main class="flex-grow-1">
         <nav class="navbar navbar-light bg-white border-bottom px-4">
-            <span class="fw-semibold">@yield('title', 'Trang chủ')</span>
+            <span class="fw-semibold text-primary">@yield('title', 'Trang chủ')</span>
             <div class="d-flex align-items-center gap-3">
                 <span class="text-muted small">{{ auth()->user()->name }} ({{ auth()->user()->role }})</span>
                 <form method="POST" action="{{ route('logout') }}">

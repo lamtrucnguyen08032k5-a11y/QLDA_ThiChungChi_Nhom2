@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="40" height="44">
+  <path d="M100 4 L192 34 V110 C192 158 152 196 100 216 C48 196 8 158 8 110 V34 Z" fill="#0d2b57"/>
+  <path d="M100 4 L192 34 V110 C192 158 152 196 100 216 C48 196 8 158 8 110 V34 Z" fill="none" stroke="#f5a623" stroke-width="3"/>
+  <text x="100" y="88" font-family="Arial, sans-serif" font-weight="700" font-size="46" fill="#ffffff" text-anchor="middle">HVNH</text>
+  <path d="M40 120 h55 a18 18 0 0 1 18 18 a18 18 0 0 1 18 -18 h55" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M40 138 h55" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M148 138 h55" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M113 138 v40" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M75 158 q38 -22 76 0" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M55 132 l6 14 l14 6 l-14 6 l-6 14 l-6 -14 l-14 -6 l14 -6 z" fill="#f5a623"/>
+  <text x="100" y="200" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#f5a623" text-anchor="middle">KHẢO THÍ</text>
+</svg>

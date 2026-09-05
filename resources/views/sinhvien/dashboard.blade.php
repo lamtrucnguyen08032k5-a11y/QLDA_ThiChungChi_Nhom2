@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.sinhvien')
 @section('title', 'Tổng quan')
 @section('content')
 <h5 class="mb-3">Đăng ký gần đây của bạn</h5>

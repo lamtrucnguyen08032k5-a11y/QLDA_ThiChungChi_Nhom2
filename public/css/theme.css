@@ -1,0 +1,98 @@
+:root {
+    --hvnh-blue-900: #0d2b57;
+    --hvnh-blue-700: #133b6b;
+    --hvnh-blue-500: #1a5aa8;
+    --hvnh-blue-100: #e8f0fc;
+    --hvnh-orange: #f5a623;
+    --hvnh-white: #ffffff;
+    --hvnh-gray-100: #f4f7fb;
+    --hvnh-gray-300: #dbe4f0;
+}
+
+body { background: var(--hvnh-gray-100); color: #1f2937; }
+
+/* ---- Buttons ---- */
+.btn-primary {
+    background-color: var(--hvnh-blue-900);
+    border-color: var(--hvnh-blue-900);
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--hvnh-blue-700);
+    border-color: var(--hvnh-blue-700);
+}
+.btn-outline-primary {
+    color: var(--hvnh-blue-900);
+    border-color: var(--hvnh-blue-900);
+}
+.btn-outline-primary:hover {
+    background-color: var(--hvnh-blue-900);
+    border-color: var(--hvnh-blue-900);
+}
+.btn-accent {
+    background-color: var(--hvnh-orange);
+    border-color: var(--hvnh-orange);
+    color: #fff;
+}
+.btn-accent:hover { background-color: #d98e0e; border-color: #d98e0e; color: #fff; }
+
+/* ---- Text / links ---- */
+.text-primary { color: var(--hvnh-blue-900) !important; }
+a { color: var(--hvnh-blue-500); }
+
+/* ---- Cards ---- */
+.card { border: 1px solid var(--hvnh-gray-300); border-radius: .6rem; }
+.card-header-blue {
+    background: var(--hvnh-blue-900);
+    color: #fff;
+    border-radius: .6rem .6rem 0 0;
+    padding: .85rem 1.25rem;
+    font-weight: 600;
+}
+
+/* ---- Tables: key-value style (giống ảnh xác nhận thông tin) ---- */
+.table-kv th {
+    background: var(--hvnh-blue-900);
+    color: #fff;
+    width: 260px;
+    font-weight: 600;
+    vertical-align: middle;
+}
+.table-kv td, .table-kv th { padding: .75rem 1rem; border-color: var(--hvnh-gray-300); }
+
+/* ---- Badges trạng thái ---- */
+.badge-cho-duyet { background: #fde8c8; color: #92610a; }
+.badge-da-duyet { background: #d6f5e3; color: #14764a; }
+.badge-tu-choi { background: #fbdada; color: #a12626; }
+.badge-cho-bo-sung { background: #ffe4bf; color: #ad5a00; }
+.badge-da-huy { background: #e5e7eb; color: #4b5563; }
+.badge-cho-thanh-toan { background: #fde8c8; color: #92610a; }
+.badge-da-thanh-toan { background: #d6f5e3; color: #14764a; }
+.badge-thanh-toan-that-bai { background: #fbdada; color: #a12626; }
+
+/* ---- Step wizard (Đăng ký dự thi) ---- */
+.hvnh-steps { display:flex; list-style:none; padding:0; margin:0 0 1.5rem; }
+.hvnh-steps li {
+    flex:1; text-align:center; padding:.75rem .5rem; background:#e9edf3; color:#64748b;
+    font-weight:600; font-size:.9rem; position:relative; clip-path: polygon(0 0, 94% 0, 100% 50%, 94% 100%, 0 100%, 6% 50%);
+}
+.hvnh-steps li:first-child { clip-path: polygon(0 0, 94% 0, 100% 50%, 94% 100%, 0 100%); }
+.hvnh-steps li.active { background: var(--hvnh-blue-900); color:#fff; }
+.hvnh-steps li.done { background: var(--hvnh-blue-500); color:#fff; }
+
+/* ---- Sidebar (Admin/Khoa/Giảng viên) ---- */
+.sidebar { min-height: 100vh; background: var(--hvnh-blue-900); }
+.sidebar a { color: #cfe0f5; text-decoration: none; display: block; padding: .6rem 1rem; border-radius: .375rem; }
+.sidebar a.active, .sidebar a:hover { background: var(--hvnh-blue-700); color: #fff; }
+.sidebar .brand { color: #fff; font-weight: 700; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.15); margin-bottom: .5rem; display:flex; align-items:center; gap:.6rem;}
+
+/* ---- Sinh viên top navbar (giao diện kiểu cổng thông tin công khai) ---- */
+.hvnh-topbar { background: var(--hvnh-blue-900); color:#dfe9fa; font-size:.8rem; padding:.35rem 0; }
+.hvnh-topbar a { color:#dfe9fa; text-decoration:none; }
+.hvnh-navbar { background:#fff; border-bottom:1px solid var(--hvnh-gray-300); }
+.hvnh-navbar .brand-text { font-weight:800; color: var(--hvnh-blue-900); line-height:1.1; }
+.hvnh-navbar .brand-sub { font-size:.7rem; color:#64748b; letter-spacing:.03em; }
+.hvnh-navbar .nav-link { color: var(--hvnh-blue-900); font-weight:600; }
+.hvnh-navbar .nav-link.active, .hvnh-navbar .nav-link:hover { color: var(--hvnh-orange); }
+.hvnh-page-title { background: var(--hvnh-blue-100); border-bottom:1px solid var(--hvnh-gray-300); padding: 1.1rem 0; margin-bottom:1.5rem; }
+.hvnh-page-title h1 { font-size:1.3rem; font-weight:700; color: var(--hvnh-blue-900); margin:0; }
+.hvnh-footer { background: var(--hvnh-blue-900); color:#bcd2f0; padding:2rem 0; margin-top:3rem; font-size:.9rem; }

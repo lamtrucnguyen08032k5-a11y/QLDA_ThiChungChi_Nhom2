@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\KetQuaDuyetMail;
 use App\Models\DangKy;
 use App\Models\LichThi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
-// M4 - Đăng ký thi (UC4.3 Xem danh sách đăng ký + duyệt/từ chối)
+// M4 - Đăng ký thi (UC4.3 Xem danh sách đăng ký + duyệt/yêu cầu bổ sung/từ chối)
 class DangKyController extends Controller
 {
     public function index(Request $request, LichThi $lichthi)
@@ -29,9 +30,7 @@ class DangKyController extends Controller
 
         $dangky->update(['trang_thai' => 'da_duyet', 'ngay_duyet' => now()]);
 
-        Mail::raw("Đăng ký thi của bạn cho kỳ thi \"{$lichthi->ten_ky_thi}\" ngày {$lichthi->ngay_thi->format('d/m/Y')} đã được DUYỆT.", function ($m) use ($dangky) {
-            $m->to($dangky->sinhVien->email)->subject('Kết quả duyệt đăng ký thi');
-        });
+        Mail::to($dangky->sinhVien->email)->send(new KetQuaDuyetMail($dangky));
 
         return back()->with('status', 'Đã duyệt đăng ký.');
     }
@@ -45,10 +44,29 @@ class DangKyController extends Controller
             'ngay_duyet' => now(),
         ]);
 
-        Mail::raw("Đăng ký thi của bạn cho kỳ thi \"{$lichthi->ten_ky_thi}\" đã bị TỪ CHỐI.\nLý do: {$data['ly_do_tu_choi']}", function ($m) use ($dangky) {
-            $m->to($dangky->sinhVien->email)->subject('Kết quả duyệt đăng ký thi');
-        });
+        Mail::to($dangky->sinhVien->email)->send(new KetQuaDuyetMail($dangky));
 
         return back()->with('status', 'Đã từ chối đăng ký.');
+    }
+
+    // Yêu cầu bổ sung hồ sơ: chọn các trường cần sửa + lý do + hạn bổ sung
+    public function yeuCauBoSung(Request $request, LichThi $lichthi, DangKy $dangky)
+    {
+        $data = $request->validate([
+            'truong_can_bo_sung' => ['required', 'array', 'min:1'],
+            'ly_do_bo_sung' => ['required', 'string'],
+            'han_bo_sung' => ['required', 'date', 'after:now'],
+        ]);
+
+        $dangky->update([
+            'trang_thai' => 'cho_bo_sung',
+            'truong_can_bo_sung' => $data['truong_can_bo_sung'],
+            'ly_do_bo_sung' => $data['ly_do_bo_sung'],
+            'han_bo_sung' => $data['han_bo_sung'],
+        ]);
+
+        Mail::to($dangky->sinhVien->email)->send(new KetQuaDuyetMail($dangky));
+
+        return back()->with('status', 'Đã gửi yêu cầu bổ sung hồ sơ cho sinh viên.');
     }
 }

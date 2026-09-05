@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.sinhvien')
 @section('title', 'Đăng ký nhận chứng nhận')
 @section('content')
 <div class="card"><div class="card-body">

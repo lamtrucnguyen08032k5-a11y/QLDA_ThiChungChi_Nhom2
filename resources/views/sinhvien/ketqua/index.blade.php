@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.sinhvien')
 @section('title', 'Kết quả thi')
 @section('content')
 <table class="table table-bordered bg-white">
