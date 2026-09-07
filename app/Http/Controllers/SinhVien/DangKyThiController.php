@@ -235,6 +235,8 @@ class DangKyThiController extends Controller
     {
         abort_unless($dangky->sinh_vien_id === Auth::id(), 403);
 
+        $dangky->kiemTraVaCapNhatQuaHan();
+
         return view('sinhvien.dangky.buoc4-trang-thai', compact('dangky'));
     }
 
@@ -245,6 +247,10 @@ class DangKyThiController extends Controller
             ->where('sinh_vien_id', Auth::id())
             ->orderByDesc('created_at')
             ->paginate(15);
+
+        foreach ($dangKys as $dk) {
+            $dk->kiemTraVaCapNhatQuaHan();
+        }
 
         return view('sinhvien.dangky.cua-toi', compact('dangKys'));
     }

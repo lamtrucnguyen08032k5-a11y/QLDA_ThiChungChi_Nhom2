@@ -17,7 +17,7 @@ class DangKy extends Model
         'dia_chi_chi_tiet', 'email_lien_he',
         'so_cccd', 'anh_cccd_truoc', 'anh_cccd_sau', 'anh_ho_so', 'anh_the_sv',
         'truong_can_bo_sung', 'ly_do_bo_sung', 'han_bo_sung', 'ngay_bo_sung',
-        'phuong_thuc_thanh_toan', 'trang_thai_thanh_toan', 'ma_giao_dich', 'so_tien', 'ngay_thanh_toan',
+        'phuong_thuc_thanh_toan', 'trang_thai_thanh_toan', 'ma_giao_dich', 'so_tien', 'ngay_thanh_toan', 'ngay_nhac_thanh_toan',
     ];
 
     protected function casts(): array
@@ -28,6 +28,7 @@ class DangKy extends Model
             'han_bo_sung' => 'datetime',
             'ngay_bo_sung' => 'datetime',
             'ngay_thanh_toan' => 'datetime',
+            'ngay_nhac_thanh_toan' => 'datetime',
             'truong_can_bo_sung' => 'array',
         ];
     }
@@ -88,8 +89,75 @@ class DangKy extends Model
         return $this->lichThi->ngay_thi->copy()->subDays(1)->format('d/m/Y');
     }
 
+    /**
+     * Hạn chót thanh toán lệ phí thi: muộn nhất là sau 2 ngày (48 giờ) kể từ khi tạo hồ sơ,
+     * nhưng không vượt quá hạn đăng ký của ca thi.
+     */
+    public function hanThanhToan(): \Carbon\Carbon
+    {
+        $han2Ngay = $this->created_at ? $this->created_at->copy()->addDays(2) : now()->addDays(2);
+        if ($this->lichThi && $this->lichThi->han_dang_ky && $this->lichThi->han_dang_ky->lt($han2Ngay)) {
+            return $this->lichThi->han_dang_ky;
+        }
+        return $han2Ngay;
+    }
+
+    /**
+     * Kiểm tra hồ sơ đã quá hạn thanh toán chưa
+     */
+    public function isQuaHanThanhToan(): bool
+    {
+        if ($this->trang_thai_thanh_toan === 'da_thanh_toan' || $this->trang_thai === 'da_huy') {
+            return false;
+        }
+        return now()->gt($this->hanThanhToan());
+    }
+
+    /**
+     * Kiểm tra có đang trong vòng 12h trước khi hết hạn nộp tiền không
+     */
+    public function isSapHetHanThanhToan(): bool
+    {
+        if ($this->trang_thai_thanh_toan === 'da_thanh_toan' || $this->trang_thai === 'da_huy') {
+            return false;
+        }
+        $han = $this->hanThanhToan();
+        return now()->lt($han) && now()->gte($han->copy()->subHours(12));
+    }
+
+    /**
+     * Tự động kiểm tra và hủy hồ sơ nếu đã quá hạn thanh toán (sau 2 ngày)
+     */
+    public function kiemTraVaCapNhatQuaHan(): bool
+    {
+        if ($this->isQuaHanThanhToan()) {
+            $trangThaiTruoc = $this->trang_thai;
+            $this->update([
+                'trang_thai' => 'da_huy',
+                'trang_thai_thanh_toan' => 'thanh_toan_that_bai',
+            ]);
+
+            LichSuXuLyHoSo::create([
+                'dang_ky_id' => $this->id,
+                'user_id' => null,
+                'vai_tro' => 'admin',
+                'hanh_dong' => 'huy',
+                'trang_thai_truoc' => $trangThaiTruoc,
+                'trang_thai_sau' => 'da_huy',
+                'noi_dung' => 'Hệ thống tự động huỷ đăng ký do quá hạn thanh toán lệ phí thi (sau 2 ngày kể từ khi đăng ký).',
+            ]);
+
+            return true;
+        }
+        return false;
+    }
+
     public function nhanTrangThaiLabel(): string
     {
+        if ($this->trang_thai_thanh_toan === 'cho_thanh_toan' && $this->trang_thai !== 'da_huy') {
+            return 'Chờ thanh toán';
+        }
+
         return match ($this->trang_thai) {
             'cho_duyet' => 'Chờ duyệt',
             'cho_bo_sung' => 'Yêu cầu bổ sung',

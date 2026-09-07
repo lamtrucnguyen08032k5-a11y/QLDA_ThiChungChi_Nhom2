@@ -41,6 +41,34 @@
                     </a>
                 </div>
             @endif
+        @elseif ($dangky->trang_thai === 'da_huy')
+            <div class="alert alert-danger shadow-sm border-danger p-4 mb-4">
+                <h5 class="alert-heading fw-bold text-danger">❌ Hồ sơ đăng ký đã bị huỷ</h5>
+                <p class="mb-2">
+                    Hồ sơ đăng ký <strong>{{ $dangky->ma_dang_ky }}</strong> đã bị huỷ
+                    @if ($dangky->isQuaHanThanhToan() || $dangky->trang_thai_thanh_toan === 'thanh_toan_that_bai')
+                        do quá thời hạn thanh toán lệ phí (sau 2 ngày kể từ lúc đăng ký).
+                    @else
+                        theo yêu cầu.
+                    @endif
+                </p>
+                @php
+                    $lichThi = $dangky->lichThi;
+                    $coTheDangKyLai = $lichThi && !$lichThi->daHetHanDangKy() && $lichThi->trang_thai === 'dang_mo_dang_ky' && ($lichThi->dangKysDaDuyet()->count() < $lichThi->so_luong_toi_da);
+                @endphp
+                @if ($coTheDangKyLai)
+                    <p class="mb-3 text-success fw-semibold">
+                        Ca thi này hiện vẫn còn chỗ và còn thời hạn đăng ký. Bạn có thể đăng ký lại ngay bây giờ.
+                    </p>
+                    <a href="{{ route('sinhvien.dangky.buoc1', $lichThi) }}" class="btn btn-primary fw-bold px-4">
+                        🔄 Đăng ký lại ca thi này
+                    </a>
+                @else
+                    <p class="mb-0 text-muted small">
+                        Ca thi này hiện đã đóng đăng ký hoặc đã đủ chỉ tiêu thí sinh.
+                    </p>
+                @endif
+            </div>
         @elseif ($dangky->trang_thai_thanh_toan === 'da_thanh_toan')
             <div class="alert alert-success shadow-sm mb-4">
                 <strong>✅ Thanh toán thành công!</strong> Hồ sơ đăng ký dự thi của bạn đã được ghi nhận với trạng thái:
@@ -51,8 +79,42 @@
                 <span><strong>❌ Thanh toán thất bại.</strong> Hồ sơ chưa được gửi đi. Vui lòng thử lại.</span>
                 <a href="{{ route('sinhvien.dangky.buoc3', $dangky) }}" class="btn btn-sm btn-primary">Thanh toán lại</a>
             </div>
+        @elseif ($dangky->isSapHetHanThanhToan())
+            <div class="alert alert-danger border-danger shadow-sm p-4 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="fs-3">⚠️</span>
+                    <h5 class="alert-heading fw-bold text-danger mb-0">CẢNH BÁO: SẮP HẾT HẠN NỘP LỆ PHÍ THI!</h5>
+                </div>
+                <p class="mb-2 text-dark">
+                    Hồ sơ của bạn còn <strong>dưới 12 giờ</strong> trước khi hết hạn nộp tiền. Yêu cầu thanh toán muộn nhất trước:
+                    <strong class="text-danger fs-6">{{ $dangky->hanThanhToan()->format('H:i \n\g\à\y d/m/Y') }}</strong>
+                    (sau 2 ngày kể từ thời điểm đăng ký).
+                </p>
+                <p class="mb-3 small text-muted">
+                    Sau thời điểm trên, hồ sơ sẽ tự động bị huỷ. Bạn vẫn có thể đăng ký lại nếu ca thi còn chỗ và còn thời gian đăng ký.
+                </p>
+                <a href="{{ route('sinhvien.dangky.buoc3', $dangky) }}" class="btn btn-danger fw-bold px-4">
+                    💳 Thanh toán ngay bây giờ →
+                </a>
+            </div>
         @else
-            <div class="alert alert-warning mb-4">⏳ Đang chờ xử lý thanh toán...</div>
+            <div class="alert alert-warning border-warning shadow-sm p-4 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="fs-4">⏳</span>
+                    <h5 class="alert-heading fw-bold text-dark mb-0">Hồ sơ đang chờ thanh toán lệ phí</h5>
+                </div>
+                <p class="mb-2 text-dark">
+                    Yêu cầu bạn hoàn tất nộp lệ phí thi muộn nhất trước:
+                    <strong class="text-primary fs-6">{{ $dangky->hanThanhToan()->format('H:i \n\g\à\y d/m/Y') }}</strong>
+                    (sau 2 ngày kể từ thời điểm đăng ký).
+                </p>
+                <p class="mb-3 small text-muted">
+                    Sau thời điểm trên, hồ sơ sẽ tự động bị huỷ. Bạn vẫn có thể đăng ký lại nếu ca thi còn chỗ và còn thời gian mở.
+                </p>
+                <a href="{{ route('sinhvien.dangky.buoc3', $dangky) }}" class="btn btn-primary fw-bold px-4">
+                    Tiến hành thanh toán →
+                </a>
+            </div>
         @endif
 
         <div class="card mb-3 shadow-sm border-0">

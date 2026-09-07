@@ -23,6 +23,11 @@ class ThanhToanController extends Controller
     {
         abort_unless($dangky->sinh_vien_id === Auth::id(), 403);
 
+        if ($dangky->kiemTraVaCapNhatQuaHan() || $dangky->trang_thai === 'da_huy') {
+            return redirect()->route('sinhvien.dangky.buoc4', $dangky)
+                ->withErrors(['dangky' => 'Hồ sơ đã bị huỷ do quá thời hạn thanh toán lệ phí thi (sau 2 ngày).']);
+        }
+
         if ($dangky->trang_thai_thanh_toan === 'da_thanh_toan') {
             return redirect()->route('sinhvien.dangky.buoc4', $dangky);
         }
@@ -34,6 +39,11 @@ class ThanhToanController extends Controller
     public function khoiTao(Request $request, DangKy $dangky)
     {
         abort_unless($dangky->sinh_vien_id === Auth::id(), 403);
+
+        if ($dangky->kiemTraVaCapNhatQuaHan() || $dangky->trang_thai === 'da_huy') {
+            return redirect()->route('sinhvien.dangky.buoc4', $dangky)
+                ->withErrors(['dangky' => 'Hồ sơ đã bị huỷ do quá thời hạn thanh toán lệ phí thi (sau 2 ngày).']);
+        }
 
         $data = $request->validate([
             'phuong_thuc_thanh_toan' => ['required', 'in:vnpay,napas'],

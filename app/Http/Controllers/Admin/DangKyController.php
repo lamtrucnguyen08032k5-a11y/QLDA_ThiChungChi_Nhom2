@@ -63,7 +63,11 @@ class DangKyController extends Controller
 
         // Lọc theo trạng thái hồ sơ
         if ($request->filled('trang_thai')) {
-            $q->where('trang_thai', $request->trang_thai);
+            if ($request->trang_thai === 'cho_thanh_toan') {
+                $q->where('trang_thai_thanh_toan', 'cho_thanh_toan')->where('trang_thai', '!=', 'da_huy');
+            } else {
+                $q->where('trang_thai', $request->trang_thai);
+            }
         }
 
         $dangKys = $q->orderByDesc('created_at')->paginate(20)->withQueryString();
@@ -99,6 +103,10 @@ class DangKyController extends Controller
     // Trường hợp 1: Duyệt hồ sơ
     public function approve(Request $request, LichThi $lichthi, DangKy $dangky)
     {
+        if ($dangky->trang_thai_thanh_toan !== 'da_thanh_toan') {
+            return back()->withErrors(['dangky' => 'Thí sinh chưa thanh toán lệ phí thi. Không thể duyệt hồ sơ khi chưa hoàn tất thanh toán.']);
+        }
+
         if ($lichthi->dangKysDaDuyet()->where('id', '!=', $dangky->id)->count() >= $lichthi->so_luong_toi_da) {
             return back()->withErrors(['dangky' => 'Ca thi đã đủ số lượng tối đa (' . $lichthi->so_luong_toi_da . ' thí sinh), không thể duyệt thêm.']);
         }
@@ -136,6 +144,10 @@ class DangKyController extends Controller
     // Trường hợp 2: Yêu cầu bổ sung hồ sơ
     public function yeuCauBoSung(Request $request, LichThi $lichthi, DangKy $dangky)
     {
+        if ($dangky->trang_thai_thanh_toan !== 'da_thanh_toan') {
+            return back()->withErrors(['dangky' => 'Thí sinh chưa thanh toán lệ phí thi. Không thể yêu cầu bổ sung hồ sơ khi chưa hoàn tất thanh toán.']);
+        }
+
         $messages = [
             'truong_can_bo_sung.required' => 'Vui lòng chọn ít nhất một trường cần bổ sung.',
             'truong_can_bo_sung.min' => 'Vui lòng chọn ít nhất một trường cần bổ sung.',
@@ -206,6 +218,10 @@ class DangKyController extends Controller
     // Trường hợp 3: Từ chối đăng ký
     public function reject(Request $request, LichThi $lichthi, DangKy $dangky)
     {
+        if ($dangky->trang_thai_thanh_toan !== 'da_thanh_toan') {
+            return back()->withErrors(['dangky' => 'Thí sinh chưa thanh toán lệ phí thi. Không thể từ chối hồ sơ khi chưa hoàn tất thanh toán.']);
+        }
+
         $messages = [
             'ly_do_tu_choi.required' => 'Vui lòng nhập lý do xử lý hồ sơ.',
         ];

@@ -40,6 +40,7 @@
             <div class="col-md-3">
                 <select name="trang_thai" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option value="">-- Tất cả trạng thái hồ sơ --</option>
+                    <option value="cho_thanh_toan" {{ request('trang_thai') === 'cho_thanh_toan' ? 'selected' : '' }}>Chờ thanh toán</option>
                     <option value="cho_duyet" {{ request('trang_thai') === 'cho_duyet' ? 'selected' : '' }}>Chờ duyệt</option>
                     <option value="cho_bo_sung" {{ request('trang_thai') === 'cho_bo_sung' ? 'selected' : '' }}>Yêu cầu bổ sung</option>
                     <option value="da_bo_sung" {{ request('trang_thai') === 'da_bo_sung' ? 'selected' : '' }}>Đã bổ sung/Chờ duyệt lại</option>
@@ -87,7 +88,9 @@
                         <td><small>{{ optional($dk->sinhVien->khoa)->ten_khoa ?? '—' }}</small></td>
                         <td><small class="text-muted">{{ $dk->created_at->format('d/m/Y H:i') }}</small></td>
                         <td class="text-center">
-                            @if ($dk->trang_thai === 'cho_duyet')
+                            @if ($dk->trang_thai_thanh_toan === 'cho_thanh_toan' && $dk->trang_thai !== 'da_huy')
+                                <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                            @elseif ($dk->trang_thai === 'cho_duyet')
                                 <span class="badge bg-warning text-dark">Chờ duyệt</span>
                             @elseif ($dk->trang_thai === 'cho_bo_sung')
                                 <span class="badge bg-info text-dark">Yêu cầu bổ sung</span>
@@ -139,7 +142,7 @@
                     <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <strong>Trạng thái hiện tại:</strong>
-                            <span class="badge bg-primary fs-6 ms-2">{{ $dk->nhanTrangThaiLabel() }}</span>
+                            <span class="badge {{ $dk->trang_thai_thanh_toan === 'cho_thanh_toan' && $dk->trang_thai !== 'da_huy' ? 'bg-warning text-dark' : 'bg-primary' }} fs-6 ms-2">{{ $dk->nhanTrangThaiLabel() }}</span>
                             @if ($dk->nguoiDuyet)
                                 <small class="text-muted ms-3">(Người xử lý gần nhất: {{ $dk->nguoiDuyet->name }})</small>
                             @endif
@@ -148,6 +151,19 @@
                             <small class="text-muted">Ngày nộp: {{ $dk->created_at->format('d/m/Y H:i:s') }}</small>
                         </div>
                     </div>
+
+                    @if ($dk->trang_thai_thanh_toan === 'cho_thanh_toan' && $dk->trang_thai !== 'da_huy')
+                        <div class="alert alert-warning border-warning d-flex align-items-center mb-4">
+                            <div class="fs-3 me-3">⏳</div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">Hồ sơ đang ở trạng thái: Chờ thanh toán</h6>
+                                <p class="mb-0 small text-dark">
+                                    Thí sinh chưa hoàn tất nộp lệ phí thi (Hạn chót: <strong>{{ $dk->hanThanhToan()->format('d/m/Y H:i') }}</strong>).
+                                    Các chức năng <strong>Duyệt hồ sơ</strong>, <strong>Yêu cầu bổ sung</strong> và <strong>Từ chối</strong> bị vô hiệu hoá và chỉ mở sau khi thí sinh đã thanh toán thành công.
+                                </p>
+                            </div>
+                        </div>
+                    @endif
 
                     @if ($dk->trang_thai === 'cho_bo_sung')
                         <div class="alert alert-warning">
@@ -294,14 +310,21 @@
                 </div>
                 <div class="modal-footer bg-light d-flex justify-content-between">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <div class="d-flex gap-2">
-                        @if (in_array($dk->trang_thai, ['cho_duyet', 'da_bo_sung']))
-                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#duyet{{ $dk->id }}">✅ Duyệt hồ sơ</button>
-                            <button class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#boSung{{ $dk->id }}">⚠️ Yêu cầu bổ sung</button>
-                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#tuChoi{{ $dk->id }}">❌ Từ chối</button>
-                        @elseif ($dk->trang_thai === 'cho_bo_sung')
-                            <button class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#boSung{{ $dk->id }}">✏️ Sửa yêu cầu bổ sung</button>
-                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#tuChoi{{ $dk->id }}">❌ Từ chối</button>
+                    <div class="d-flex gap-2 align-items-center">
+                        @if ($dk->trang_thai_thanh_toan !== 'da_thanh_toan')
+                            <span class="badge bg-warning text-dark me-1">⏳ Chờ thí sinh thanh toán lệ phí</span>
+                            <button class="btn btn-success" disabled title="Chỉ được thao tác sau khi thí sinh hoàn tất thanh toán lệ phí">✅ Duyệt hồ sơ</button>
+                            <button class="btn btn-warning text-dark" disabled title="Chỉ được thao tác sau khi thí sinh hoàn tất thanh toán lệ phí">⚠️ Yêu cầu bổ sung</button>
+                            <button class="btn btn-danger" disabled title="Chỉ được thao tác sau khi thí sinh hoàn tất thanh toán lệ phí">❌ Từ chối</button>
+                        @else
+                            @if (in_array($dk->trang_thai, ['cho_duyet', 'da_bo_sung']))
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#duyet{{ $dk->id }}">✅ Duyệt hồ sơ</button>
+                                <button class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#boSung{{ $dk->id }}">⚠️ Yêu cầu bổ sung</button>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#tuChoi{{ $dk->id }}">❌ Từ chối</button>
+                            @elseif ($dk->trang_thai === 'cho_bo_sung')
+                                <button class="btn btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#boSung{{ $dk->id }}">✏️ Sửa yêu cầu bổ sung</button>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#tuChoi{{ $dk->id }}">❌ Từ chối</button>
+                            @endif
                         @endif
                     </div>
                 </div>
