@@ -46,8 +46,8 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
-                            <input type="date" name="ngay_sinh" class="form-control @error('ngay_sinh') is-invalid @enderror" value="{{ old('ngay_sinh', $draft['ngay_sinh'] ?? '') }}">
-                            @error('ngay_sinh')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="date" name="ngay_sinh" id="input_ngay_sinh" max="{{ \Illuminate\Support\Carbon::now()->subYears(18)->toDateString() }}" class="form-control @error('ngay_sinh') is-invalid @enderror" value="{{ old('ngay_sinh', $draft['ngay_sinh'] ?? '') }}">
+                            <div class="invalid-feedback" id="err_ngay_sinh">@error('ngay_sinh'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label d-block">Giới tính <span class="text-danger">*</span></label>
@@ -60,25 +60,22 @@
                                 <input class="form-check-input @error('gioi_tinh') is-invalid @enderror" type="radio" name="gioi_tinh" value="nu" id="gt_nu" {{ $gt === 'nu' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="gt_nu">Nữ</label>
                             </div>
-                            @error('gioi_tinh')<div class="small text-danger mt-1">{{ $message }}</div>@enderror
+                            <div class="small text-danger mt-1" id="err_gioi_tinh">@error('gioi_tinh'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Dân tộc <span class="text-danger">*</span></label>
-                            <input type="text" name="dan_toc" class="form-control @error('dan_toc') is-invalid @enderror" value="{{ old('dan_toc', $draft['dan_toc'] ?? 'Kinh') }}">
-                            @error('dan_toc')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" name="dan_toc" id="input_dan_toc" class="form-control @error('dan_toc') is-invalid @enderror" value="{{ old('dan_toc', $draft['dan_toc'] ?? 'Kinh') }}">
+                            <div class="invalid-feedback" id="err_dan_toc">@error('dan_toc'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nơi sinh <span class="text-danger">*</span></label>
-                            <input type="text" name="noi_sinh" class="form-control @error('noi_sinh') is-invalid @enderror" value="{{ old('noi_sinh', $draft['noi_sinh'] ?? '') }}">
-                            @error('noi_sinh')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" name="noi_sinh" id="input_noi_sinh" class="form-control @error('noi_sinh') is-invalid @enderror" value="{{ old('noi_sinh', $draft['noi_sinh'] ?? '') }}">
+                            <div class="invalid-feedback" id="err_noi_sinh">@error('noi_sinh'){{ $message }}@enderror</div>
                         </div>
-
-                        <div class="col-12"><hr></div>
-                        <div class="col-12"><h6 class="text-primary">Thông tin pháp lý</h6></div>
                         <div class="col-md-6">
-                            <label class="form-label">Số CCCD <span class="text-danger">*</span></label>
-                            <input type="text" name="so_cccd" class="form-control @error('so_cccd') is-invalid @enderror" value="{{ old('so_cccd', $draft['so_cccd'] ?? '') }}">
-                            @error('so_cccd')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <label class="form-label">CCCD/Số CCCD <span class="text-danger">*</span></label>
+                            <input type="text" name="so_cccd" id="input_so_cccd" maxlength="12" placeholder="Nhập số CCCD" class="form-control @error('so_cccd') is-invalid @enderror" value="{{ old('so_cccd', $draft['so_cccd'] ?? '') }}">
+                            <div class="invalid-feedback" id="err_so_cccd">@error('so_cccd'){{ $message }}@enderror</div>
                         </div>
                     </div>
                 </div>
@@ -96,29 +93,29 @@
                             <select id="select_tinh" name="tinh_thanh_pho" class="form-select @error('tinh_thanh_pho') is-invalid @enderror" data-old-value="{{ old('tinh_thanh_pho', $draft['tinh_thanh_pho_code'] ?? '') }}">
                                 <option value="">Chọn tỉnh/thành phố</option>
                             </select>
-                            @error('tinh_thanh_pho')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="invalid-feedback" id="err_tinh_thanh_pho">@error('tinh_thanh_pho'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Xã/Phường <span class="text-danger">*</span></label>
                             <select id="select_xa" name="xa_phuong" class="form-select @error('xa_phuong') is-invalid @enderror" data-old-value="{{ old('xa_phuong', $draft['xa_phuong_code'] ?? '') }}" disabled>
                                 <option value="">Chọn xã/phường</option>
                             </select>
-                            @error('xa_phuong')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div class="invalid-feedback" id="err_xa_phuong">@error('xa_phuong'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Số nhà, đường/phố <span class="text-danger">*</span></label>
-                            <input type="text" name="dia_chi_chi_tiet" class="form-control @error('dia_chi_chi_tiet') is-invalid @enderror" value="{{ old('dia_chi_chi_tiet', $draft['dia_chi_chi_tiet'] ?? '') }}">
-                            @error('dia_chi_chi_tiet')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" name="dia_chi_chi_tiet" id="input_dia_chi_chi_tiet" class="form-control @error('dia_chi_chi_tiet') is-invalid @enderror" value="{{ old('dia_chi_chi_tiet', $draft['dia_chi_chi_tiet'] ?? '') }}">
+                            <div class="invalid-feedback" id="err_dia_chi_chi_tiet">@error('dia_chi_chi_tiet'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                            <input type="text" name="so_dien_thoai" class="form-control @error('so_dien_thoai') is-invalid @enderror" value="{{ old('so_dien_thoai', $draft['so_dien_thoai'] ?? '') }}">
-                            @error('so_dien_thoai')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" name="so_dien_thoai" id="input_so_dien_thoai" maxlength="10" placeholder="Nhập số điện thoại" class="form-control @error('so_dien_thoai') is-invalid @enderror" value="{{ old('so_dien_thoai', $draft['so_dien_thoai'] ?? '') }}">
+                            <div class="invalid-feedback" id="err_so_dien_thoai">@error('so_dien_thoai'){{ $message }}@enderror</div>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">Email liên hệ <span class="text-danger">*</span></label>
-                            <input type="email" name="email_lien_he" class="form-control @error('email_lien_he') is-invalid @enderror" value="{{ old('email_lien_he', $draft['email_lien_he'] ?? '') }}" placeholder="Email khác để nhận thông báo (có thể khác email trường)">
-                            @error('email_lien_he')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="email" name="email_lien_he" id="input_email_lien_he" class="form-control @error('email_lien_he') is-invalid @enderror" value="{{ old('email_lien_he', $draft['email_lien_he'] ?? '') }}" placeholder="Email khác để nhận thông báo (có thể khác email trường)">
+                            <div class="invalid-feedback" id="err_email_lien_he">@error('email_lien_he'){{ $message }}@enderror</div>
                             <div class="form-text">Email này dùng để liên hệ khi cần, có thể khác với email tài khoản ({{ $u->email }}).</div>
                         </div>
                     </div>
@@ -154,7 +151,7 @@
                         <span class="placeholder-text {{ empty($draft['anh_ho_so']) ? '' : 'd-none' }}">Chưa có ảnh — bấm chọn tệp bên dưới</span>
                     </div>
                     <input type="file" name="anh_ho_so" id="input_anh_ho_so" data-preview="preview_anh_ho_so" accept="image/*" class="form-control mb-3 @error('anh_ho_so') is-invalid @enderror">
-                    @error('anh_ho_so')<div class="invalid-feedback d-block mt-n2 mb-3">{{ $message }}</div>@enderror
+                    <div class="invalid-feedback d-block mt-n2 mb-3" id="err_anh_ho_so">@error('anh_ho_so'){{ $message }}@enderror</div>
 
                     <hr>
 
@@ -168,11 +165,7 @@
                         <span class="placeholder-text {{ empty($draft['anh_cccd_truoc']) ? '' : 'd-none' }}">Chưa có ảnh</span>
                     </div>
                     <input type="file" name="anh_cccd_truoc" id="input_anh_cccd_truoc" data-preview="preview_anh_cccd_truoc" accept="image/*" class="form-control mb-1 @error('anh_cccd_truoc') is-invalid @enderror">
-                    @if ($errors->has('anh_cccd_truoc'))
-                        <div class="invalid-feedback d-block mb-3">{{ $errors->first('anh_cccd_truoc') }}</div>
-                    @else
-                        <div class="mb-3"></div>
-                    @endif
+                    <div class="invalid-feedback d-block mb-3" id="err_anh_cccd_truoc">@error('anh_cccd_truoc'){{ $message }}@enderror</div>
 
                     <label class="form-label small text-muted mb-1">Mặt sau</label>
                     <div class="hvnh-anh-preview mb-1 {{ empty($draft['anh_cccd_sau']) ? '' : 'has-img' }}" id="preview_box_anh_cccd_sau">
@@ -180,11 +173,7 @@
                         <span class="placeholder-text {{ empty($draft['anh_cccd_sau']) ? '' : 'd-none' }}">Chưa có ảnh</span>
                     </div>
                     <input type="file" name="anh_cccd_sau" id="input_anh_cccd_sau" data-preview="preview_anh_cccd_sau" accept="image/*" class="form-control mb-1 @error('anh_cccd_sau') is-invalid @enderror">
-                    @if ($errors->has('anh_cccd_sau'))
-                        <div class="invalid-feedback d-block mb-3">{{ $errors->first('anh_cccd_sau') }}</div>
-                    @else
-                        <div class="mb-3"></div>
-                    @endif
+                    <div class="invalid-feedback d-block mb-3" id="err_anh_cccd_sau">@error('anh_cccd_sau'){{ $message }}@enderror</div>
 
                     <hr>
 
@@ -195,7 +184,7 @@
                         <span class="placeholder-text {{ empty($draft['anh_the_sv']) ? '' : 'd-none' }}">Chưa có ảnh</span>
                     </div>
                     <input type="file" name="anh_the_sv" id="input_anh_the_sv" data-preview="preview_anh_the_sv" accept="image/*" class="form-control @error('anh_the_sv') is-invalid @enderror">
-                    @error('anh_the_sv')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <div class="invalid-feedback" id="err_anh_the_sv">@error('anh_the_sv'){{ $message }}@enderror</div>
                 </div>
             </div>
         </div>
@@ -226,6 +215,230 @@ document.querySelectorAll('input[type=file][data-preview]').forEach(function (in
         }
     });
 });
+
+// Real-time validation script
+(function () {
+    var inputCccd = document.getElementById('input_so_cccd');
+    var inputPhone = document.getElementById('input_so_dien_thoai');
+    var inputEmail = document.getElementById('input_email_lien_he');
+    var inputNgaySinh = document.getElementById('input_ngay_sinh');
+    var form = document.querySelector('form');
+
+    function setError(inputEl, msgEl, message) {
+        if (!inputEl) return;
+        inputEl.classList.add('is-invalid');
+        if (msgEl) {
+            msgEl.textContent = message;
+            msgEl.style.display = 'block';
+        }
+    }
+
+    function clearError(inputEl, msgEl) {
+        if (!inputEl) return;
+        inputEl.classList.remove('is-invalid');
+        if (msgEl) {
+            msgEl.textContent = '';
+            msgEl.style.display = '';
+        }
+    }
+
+    function validateCccd(isSubmit) {
+        if (!inputCccd) return true;
+        var val = inputCccd.value.trim();
+        var errEl = document.getElementById('err_so_cccd');
+        if (val.length === 0) {
+            if (isSubmit) {
+                setError(inputCccd, errEl, 'Vui lòng nhập CCCD/Số CCCD.');
+                return false;
+            } else {
+                clearError(inputCccd, errEl);
+                return true;
+            }
+        }
+        if (val.length < 12) {
+            setError(inputCccd, errEl, 'CCCD/Số CCCD phải bao gồm đúng 12 chữ số.');
+            return false;
+        }
+        clearError(inputCccd, errEl);
+        return true;
+    }
+
+    function validatePhone(isSubmit) {
+        if (!inputPhone) return true;
+        var val = inputPhone.value.trim();
+        var errEl = document.getElementById('err_so_dien_thoai');
+        if (val.length === 0) {
+            if (isSubmit) {
+                setError(inputPhone, errEl, 'Vui lòng nhập số điện thoại.');
+                return false;
+            } else {
+                clearError(inputPhone, errEl);
+                return true;
+            }
+        }
+        if (val.length < 10) {
+            setError(inputPhone, errEl, 'Số điện thoại phải bao gồm đúng 10 chữ số.');
+            return false;
+        }
+        clearError(inputPhone, errEl);
+        return true;
+    }
+
+    function validateEmail(isSubmit) {
+        if (!inputEmail) return true;
+        var val = inputEmail.value.trim();
+        var errEl = document.getElementById('err_email_lien_he');
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (val.length === 0) {
+            if (isSubmit) {
+                setError(inputEmail, errEl, 'Vui lòng nhập email liên hệ.');
+                return false;
+            } else {
+                clearError(inputEmail, errEl);
+                return true;
+            }
+        }
+        if (!emailRegex.test(val)) {
+            setError(inputEmail, errEl, 'Email liên hệ không đúng định dạng.');
+            return false;
+        }
+        clearError(inputEmail, errEl);
+        return true;
+    }
+
+    function validateNgaySinh(isSubmit) {
+        if (!inputNgaySinh) return true;
+        var val = inputNgaySinh.value;
+        var errEl = document.getElementById('err_ngay_sinh');
+        if (!val) {
+            if (isSubmit) {
+                setError(inputNgaySinh, errEl, 'Vui lòng chọn ngày sinh.');
+                return false;
+            } else {
+                clearError(inputNgaySinh, errEl);
+                return true;
+            }
+        }
+        var birthDate = new Date(val);
+        var today = new Date();
+        var age = today.getFullYear() - birthDate.getFullYear();
+        var m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        if (age < 18) {
+            setError(inputNgaySinh, errEl, 'Thí sinh phải từ đủ 18 tuổi trở lên mới được đăng ký dự thi.');
+            return false;
+        }
+        clearError(inputNgaySinh, errEl);
+        return true;
+    }
+
+    // CCCD input handler (chặn gõ quá 12 số, tự động xoá ký tự không phải số)
+    if (inputCccd) {
+        inputCccd.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 12);
+            validateCccd(false);
+        });
+        inputCccd.addEventListener('blur', function () {
+            validateCccd(false);
+        });
+    }
+
+    // Phone input handler (chặn gõ quá 10 số, tự động xoá ký tự không phải số)
+    if (inputPhone) {
+        inputPhone.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            validatePhone(false);
+        });
+        inputPhone.addEventListener('blur', function () {
+            validatePhone(false);
+        });
+    }
+
+    // Email input handler
+    if (inputEmail) {
+        inputEmail.addEventListener('input', function () {
+            validateEmail(false);
+        });
+        inputEmail.addEventListener('blur', function () {
+            validateEmail(false);
+        });
+    }
+
+    // Ngày sinh input handler
+    if (inputNgaySinh) {
+        inputNgaySinh.addEventListener('change', function () {
+            validateNgaySinh(false);
+        });
+        inputNgaySinh.addEventListener('blur', function () {
+            validateNgaySinh(false);
+        });
+    }
+
+    // Form submit validation (chỉ báo lỗi thiếu khi bấm nút Tiếp tục)
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            var isValid = true;
+
+            var v1 = validateNgaySinh(true);
+            var v2 = validateCccd(true);
+            var v3 = validatePhone(true);
+            var v4 = validateEmail(true);
+
+            // Tỉnh / Xã
+            var selectTinh = document.getElementById('select_tinh');
+            var selectXa = document.getElementById('select_xa');
+            var errTinh = document.getElementById('err_tinh_thanh_pho');
+            var errXa = document.getElementById('err_xa_phuong');
+
+            if (selectTinh && !selectTinh.value) {
+                setError(selectTinh, errTinh, 'Vui lòng chọn tỉnh/thành phố.');
+                isValid = false;
+            }
+            if (selectXa && (!selectXa.value || selectXa.disabled)) {
+                setError(selectXa, errXa, 'Vui lòng chọn xã/phường.');
+                isValid = false;
+            }
+
+            // Text fields bắt buộc khác
+            var requiredText = [
+                { id: 'input_dan_toc', err: 'err_dan_toc', msg: 'Vui lòng nhập dân tộc.' },
+                { id: 'input_noi_sinh', err: 'err_noi_sinh', msg: 'Vui lòng nhập nơi sinh.' },
+                { id: 'input_dia_chi_chi_tiet', err: 'err_dia_chi_chi_tiet', msg: 'Vui lòng nhập số nhà, đường/phố.' }
+            ];
+
+            requiredText.forEach(function (f) {
+                var el = document.getElementById(f.id);
+                var errEl = document.getElementById(f.err);
+                if (el && !el.value.trim()) {
+                    setError(el, errEl, f.msg);
+                    isValid = false;
+                }
+            });
+
+            // Giới tính
+            var gtSelected = form.querySelector('input[name="gioi_tinh"]:checked');
+            var errGt = document.getElementById('err_gioi_tinh');
+            if (!gtSelected) {
+                if (errGt) {
+                    errGt.textContent = 'Vui lòng chọn giới tính.';
+                    errGt.style.display = 'block';
+                }
+                isValid = false;
+            }
+
+            if (!v1 || !v2 || !v3 || !v4 || !isValid) {
+                e.preventDefault();
+                var firstInvalid = form.querySelector('.is-invalid');
+                if (firstInvalid) {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalid.focus();
+                }
+            }
+        });
+    }
+})();
 
 // Cascading dropdown Tỉnh/Thành phố -> Xã/Phường, dữ liệu tĩnh 34 tỉnh/thành sau sáp nhập 2025
 (function () {
@@ -265,6 +478,19 @@ document.querySelectorAll('input[type=file][data-preview]').forEach(function (in
 
             selectTinh.addEventListener('change', function () {
                 napXaPhuong(this.value, null);
+                if (this.value) {
+                    selectTinh.classList.remove('is-invalid');
+                    var errTinh = document.getElementById('err_tinh_thanh_pho');
+                    if (errTinh) errTinh.textContent = '';
+                }
+            });
+
+            selectXa.addEventListener('change', function () {
+                if (this.value) {
+                    selectXa.classList.remove('is-invalid');
+                    var errXa = document.getElementById('err_xa_phuong');
+                    if (errXa) errXa.textContent = '';
+                }
             });
         })
         .catch(function () {

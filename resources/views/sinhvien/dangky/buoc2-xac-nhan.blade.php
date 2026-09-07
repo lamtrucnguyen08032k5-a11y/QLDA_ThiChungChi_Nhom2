@@ -41,7 +41,7 @@
         <tr><th>Giới tính</th><td>{{ $draft['gioi_tinh'] === 'nam' ? 'Nam' : ($draft['gioi_tinh'] === 'nu' ? 'Nữ' : 'Khác') }}</td></tr>
         <tr><th>Dân tộc</th><td>{{ $draft['dan_toc'] }}</td></tr>
         <tr><th>Nơi sinh</th><td>{{ $draft['noi_sinh'] }}</td></tr>
-        <tr><th>Số CCCD</th><td>{{ $draft['so_cccd'] }}</td></tr>
+        <tr><th>CCCD/Số CCCD</th><td>{{ $draft['so_cccd'] }}</td></tr>
         <tr><th>Số điện thoại liên hệ</th><td>{{ $draft['so_dien_thoai'] }}</td></tr>
         <tr><th>Địa chỉ liên hệ</th><td>{{ $draft['dia_chi_chi_tiet'] }}, {{ $draft['xa_phuong_ten'] }}, {{ $draft['tinh_thanh_pho_ten'] }}</td></tr>
         <tr><th>Email liên hệ</th><td>{{ $draft['email_lien_he'] }}</td></tr>
