@@ -13,6 +13,8 @@ class DangKy extends Model
         'sinh_vien_id', 'lich_thi_id', 'trang_thai', 'ly_do_tu_choi', 'ngay_duyet',
         'ma_dang_ky',
         'so_dien_thoai', 'ngay_sinh', 'gioi_tinh', 'dan_toc', 'noi_sinh',
+        'tinh_thanh_pho_code', 'tinh_thanh_pho_ten', 'xa_phuong_code', 'xa_phuong_ten',
+        'dia_chi_chi_tiet', 'email_lien_he',
         'so_cccd', 'anh_cccd_truoc', 'anh_cccd_sau', 'anh_ho_so', 'anh_the_sv',
         'truong_can_bo_sung', 'ly_do_bo_sung', 'han_bo_sung',
         'phuong_thuc_thanh_toan', 'trang_thai_thanh_toan', 'ma_giao_dich', 'so_tien', 'ngay_thanh_toan',
@@ -51,6 +53,12 @@ class DangKy extends Model
     public function baiThi()
     {
         return $this->hasOne(BaiThi::class);
+    }
+
+    public function diaChiDayDu(): ?string
+    {
+        $phan = array_filter([$this->dia_chi_chi_tiet, $this->xa_phuong_ten, $this->tinh_thanh_pho_ten]);
+        return empty($phan) ? null : implode(', ', $phan);
     }
 
     public function nhanTrangThaiLabel(): string

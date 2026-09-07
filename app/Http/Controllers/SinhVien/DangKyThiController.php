@@ -60,8 +60,9 @@ class DangKyThiController extends Controller
         }
 
         $draft = session('dangky_draft.' . $lichthi->id, []);
+        $u = Auth::user();
 
-        return view('sinhvien.dangky.buoc1', compact('lichthi', 'draft'));
+        return view('sinhvien.dangky.buoc1', compact('lichthi', 'draft', 'u'));
     }
 
     public function luuBuoc1(Request $request, LichThi $lichthi)
@@ -77,11 +78,50 @@ class DangKyThiController extends Controller
             'dan_toc' => ['required', 'string', 'max:100'],
             'noi_sinh' => ['required', 'string', 'max:255'],
             'so_cccd' => ['required', 'string', 'max:20'],
+            'tinh_thanh_pho' => ['required', 'string'],
+            'xa_phuong' => ['required', 'string'],
+            'dia_chi_chi_tiet' => ['required', 'string', 'max:255'],
+            'email_lien_he' => ['required', 'email', 'max:255'],
             'anh_cccd_truoc' => ['nullable', 'image', 'max:2048'],
             'anh_cccd_sau' => ['nullable', 'image', 'max:2048'],
             'anh_ho_so' => ['nullable', 'image', 'max:2048'],
             'anh_the_sv' => ['nullable', 'image', 'max:2048'],
+        ], [
+            'so_dien_thoai.required' => 'Vui lòng nhập số điện thoại.',
+            'ngay_sinh.required' => 'Vui lòng chọn ngày sinh.',
+            'ngay_sinh.before' => 'Ngày sinh không hợp lệ.',
+            'gioi_tinh.required' => 'Vui lòng chọn giới tính.',
+            'dan_toc.required' => 'Vui lòng nhập dân tộc.',
+            'noi_sinh.required' => 'Vui lòng nhập nơi sinh.',
+            'so_cccd.required' => 'Vui lòng nhập số CCCD.',
+            'tinh_thanh_pho.required' => 'Vui lòng chọn tỉnh/thành phố.',
+            'xa_phuong.required' => 'Vui lòng chọn xã/phường.',
+            'dia_chi_chi_tiet.required' => 'Vui lòng nhập số nhà, đường/phố.',
+            'email_lien_he.required' => 'Vui lòng nhập email liên hệ.',
+            'email_lien_he.email' => 'Email liên hệ không hợp lệ.',
+            'anh_cccd_truoc.image' => 'Ảnh CCCD mặt trước phải là file ảnh (jpg, png...).',
+            'anh_cccd_sau.image' => 'Ảnh CCCD mặt sau phải là file ảnh (jpg, png...).',
+            'anh_ho_so.image' => 'Ảnh hồ sơ dự thi phải là file ảnh (jpg, png...).',
+            'anh_the_sv.image' => 'Ảnh thẻ sinh viên phải là file ảnh (jpg, png...).',
+            'anh_cccd_truoc.max' => 'Dung lượng ảnh CCCD mặt trước tối đa 2MB.',
+            'anh_cccd_sau.max' => 'Dung lượng ảnh CCCD mặt sau tối đa 2MB.',
+            'anh_ho_so.max' => 'Dung lượng ảnh hồ sơ dự thi tối đa 2MB.',
+            'anh_the_sv.max' => 'Dung lượng ảnh thẻ sinh viên tối đa 2MB.',
         ]);
+
+        // Tra tên Tỉnh/Thành phố + Xã/Phường từ mã đã chọn (không tin tên do client gửi lên)
+        [$tenTinh, $tenXa] = $this->layTenTinhXa($request->tinh_thanh_pho, $request->xa_phuong);
+        if (! $tenTinh) {
+            return back()->withInput()->withErrors(['tinh_thanh_pho' => 'Tỉnh/thành phố không hợp lệ.']);
+        }
+        if (! $tenXa) {
+            return back()->withInput()->withErrors(['xa_phuong' => 'Xã/phường không hợp lệ, vui lòng chọn lại.']);
+        }
+        $data['tinh_thanh_pho_code'] = $request->tinh_thanh_pho;
+        $data['tinh_thanh_pho_ten'] = $tenTinh;
+        $data['xa_phuong_code'] = $request->xa_phuong;
+        $data['xa_phuong_ten'] = $tenXa;
+        unset($data['tinh_thanh_pho'], $data['xa_phuong']);
 
         $draft = session('dangky_draft.' . $lichthi->id, []);
 
@@ -95,19 +135,47 @@ class DangKyThiController extends Controller
         }
 
         // Bắt buộc: CCCD mặt trước/sau, ảnh hồ sơ dự thi (ảnh thẻ SV không bắt buộc)
-        $thieuAnh = [];
-        foreach (['anh_cccd_truoc' => 'Ảnh CCCD mặt trước', 'anh_cccd_sau' => 'Ảnh CCCD mặt sau', 'anh_ho_so' => 'Ảnh hồ sơ dự thi 4x6'] as $field => $nhan) {
+        // Mỗi ảnh thiếu sẽ báo lỗi RIÊNG dưới đúng ô upload của nó.
+        $loiAnh = [];
+        foreach ([
+            'anh_ho_so' => 'Vui lòng tải lên ảnh hồ sơ dự thi.',
+            'anh_cccd_truoc' => 'Vui lòng tải lên ảnh CCCD mặt trước.',
+            'anh_cccd_sau' => 'Vui lòng tải lên ảnh CCCD mặt sau.',
+        ] as $field => $thongBao) {
             if (empty($data[$field])) {
-                $thieuAnh[] = $nhan;
+                $loiAnh[$field] = $thongBao;
             }
         }
-        if (! empty($thieuAnh)) {
-            return back()->withInput()->withErrors(['anh_ho_so' => 'Vui lòng tải lên: ' . implode(', ', $thieuAnh) . '.']);
+        if (! empty($loiAnh)) {
+            return back()->withInput()->withErrors($loiAnh);
         }
 
         session(['dangky_draft.' . $lichthi->id => $data]);
 
         return redirect()->route('sinhvien.dangky.buoc2', $lichthi);
+    }
+
+    // Tra tên Tỉnh/Thành phố và Xã/Phường từ mã, dựa vào public/data/vn-address.json
+    // (không tin dữ liệu tên do client gửi lên, chỉ tin mã rồi tự tra lại trên server)
+    private function layTenTinhXa(?string $maTinh, ?string $maXa): array
+    {
+        static $ds = null;
+        if ($ds === null) {
+            $path = public_path('data/vn-address.json');
+            $ds = file_exists($path) ? json_decode(file_get_contents($path), true) : [];
+        }
+
+        foreach ($ds as $tinh) {
+            if ($tinh['c'] === $maTinh) {
+                foreach ($tinh['w'] as $xa) {
+                    if ($xa['c'] === $maXa) {
+                        return [$tinh['n'], $xa['n']];
+                    }
+                }
+                return [$tinh['n'], null];
+            }
+        }
+        return [null, null];
     }
 
     // ==== BƯỚC 2: Chọn thông tin đăng ký thi / Xác nhận hồ sơ ====
@@ -118,7 +186,9 @@ class DangKyThiController extends Controller
             return redirect()->route('sinhvien.dangky.buoc1', $lichthi);
         }
 
-        return view('sinhvien.dangky.buoc2-xac-nhan', compact('lichthi', 'draft'));
+        $u = Auth::user();
+
+        return view('sinhvien.dangky.buoc2-xac-nhan', compact('lichthi', 'draft', 'u'));
     }
 
     public function xacNhanBuoc2(LichThi $lichthi)

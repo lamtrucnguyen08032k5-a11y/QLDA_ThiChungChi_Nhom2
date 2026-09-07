@@ -63,7 +63,7 @@
         @if (session('status'))
             <div class="alert alert-success">{{ session('status') }}</div>
         @endif
-        @if ($errors->any())
+        @if ($errors->any() && empty($hideErrorSummary))
             <div class="alert alert-danger">
                 <ul class="mb-0">
                     @foreach ($errors->all() as $error)

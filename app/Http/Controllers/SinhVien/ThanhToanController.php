@@ -107,6 +107,8 @@ class ThanhToanController extends Controller
             'ngay_thanh_toan' => now(),
         ]);
 
-        Mail::to($dangky->sinhVien->email)->send(new DangKyThanhCongMail($dangky));
+        Mail::to($dangky->sinhVien->email)
+            ->cc($dangky->email_lien_he && $dangky->email_lien_he !== $dangky->sinhVien->email ? [$dangky->email_lien_he] : [])
+            ->send(new DangKyThanhCongMail($dangky));
     }
 }

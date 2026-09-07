@@ -30,7 +30,9 @@ class DangKyController extends Controller
 
         $dangky->update(['trang_thai' => 'da_duyet', 'ngay_duyet' => now()]);
 
-        Mail::to($dangky->sinhVien->email)->send(new KetQuaDuyetMail($dangky));
+        Mail::to($dangky->sinhVien->email)
+            ->cc($dangky->email_lien_he && $dangky->email_lien_he !== $dangky->sinhVien->email ? [$dangky->email_lien_he] : [])
+            ->send(new KetQuaDuyetMail($dangky));
 
         return back()->with('status', 'Đã duyệt đăng ký.');
     }
@@ -44,7 +46,9 @@ class DangKyController extends Controller
             'ngay_duyet' => now(),
         ]);
 
-        Mail::to($dangky->sinhVien->email)->send(new KetQuaDuyetMail($dangky));
+        Mail::to($dangky->sinhVien->email)
+            ->cc($dangky->email_lien_he && $dangky->email_lien_he !== $dangky->sinhVien->email ? [$dangky->email_lien_he] : [])
+            ->send(new KetQuaDuyetMail($dangky));
 
         return back()->with('status', 'Đã từ chối đăng ký.');
     }
@@ -65,7 +69,9 @@ class DangKyController extends Controller
             'han_bo_sung' => $data['han_bo_sung'],
         ]);
 
-        Mail::to($dangky->sinhVien->email)->send(new KetQuaDuyetMail($dangky));
+        Mail::to($dangky->sinhVien->email)
+            ->cc($dangky->email_lien_he && $dangky->email_lien_he !== $dangky->sinhVien->email ? [$dangky->email_lien_he] : [])
+            ->send(new KetQuaDuyetMail($dangky));
 
         return back()->with('status', 'Đã gửi yêu cầu bổ sung hồ sơ cho sinh viên.');
     }

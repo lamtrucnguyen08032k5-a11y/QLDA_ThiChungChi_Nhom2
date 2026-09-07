@@ -29,7 +29,23 @@ use App\Http\Controllers\SinhVien\ThanhToanController;
 use App\Http\Controllers\SinhVien\ThiController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/dang-nhap');
+// Trang chủ: chưa đăng nhập -> về trang đăng nhập; đã đăng nhập -> về đúng dashboard theo vai trò.
+// (Trước đây dùng Route::redirect('/', '/dang-nhap') vô điều kiện: khi ĐÃ đăng nhập, middleware
+// "guest" trên /dang-nhap lại đá ngược về '/' vì app không có route tên "dashboard"/"home" theo
+// quy ước mặc định của Laravel -> tạo vòng lặp redirect vô hạn (ERR_TOO_MANY_REDIRECTS). Sửa bằng
+// cách điều hướng thẳng theo vai trò ngay tại '/' thay vì trung chuyển qua '/dang-nhap'.)
+Route::get('/', function () {
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    return match (auth()->user()->role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'khoa' => redirect()->route('khoa.dashboard'),
+        'giangvien' => redirect()->route('giangvien.dashboard'),
+        default => redirect()->route('sinhvien.dashboard'),
+    };
+});
 
 /*
 |--------------------------------------------------------------------------

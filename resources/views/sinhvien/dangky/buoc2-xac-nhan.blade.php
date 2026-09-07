@@ -1,7 +1,7 @@
 @extends('layouts.sinhvien')
 @section('title', 'Xác nhận thông tin đăng ký dự thi')
 @section('content')
-@php $u = auth()->user(); @endphp
+@php $u = $u ?? auth()->user(); @endphp
 
 <ul class="hvnh-steps">
     <li class="done">Bước 1: Cập nhật thông tin cá nhân</li>
@@ -43,7 +43,8 @@
         <tr><th>Nơi sinh</th><td>{{ $draft['noi_sinh'] }}</td></tr>
         <tr><th>Số CCCD</th><td>{{ $draft['so_cccd'] }}</td></tr>
         <tr><th>Số điện thoại liên hệ</th><td>{{ $draft['so_dien_thoai'] }}</td></tr>
-        <tr><th>Email liên hệ</th><td>{{ $u->email }}</td></tr>
+        <tr><th>Địa chỉ liên hệ</th><td>{{ $draft['dia_chi_chi_tiet'] }}, {{ $draft['xa_phuong_ten'] }}, {{ $draft['tinh_thanh_pho_ten'] }}</td></tr>
+        <tr><th>Email liên hệ</th><td>{{ $draft['email_lien_he'] }}</td></tr>
     </table>
 </div>
 

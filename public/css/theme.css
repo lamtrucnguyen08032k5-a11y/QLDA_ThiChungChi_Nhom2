@@ -96,3 +96,21 @@ a { color: var(--hvnh-blue-500); }
 .hvnh-page-title { background: var(--hvnh-blue-100); border-bottom:1px solid var(--hvnh-gray-300); padding: 1.1rem 0; margin-bottom:1.5rem; }
 .hvnh-page-title h1 { font-size:1.3rem; font-weight:700; color: var(--hvnh-blue-900); margin:0; }
 .hvnh-footer { background: var(--hvnh-blue-900); color:#bcd2f0; padding:2rem 0; margin-top:3rem; font-size:.9rem; }
+
+/* ---- Khung xem trước ảnh hồ sơ đăng ký dự thi ---- */
+.hvnh-anh-preview {
+    width: 100%;
+    max-width: 220px;
+    height: 140px;
+    border: 1px dashed var(--hvnh-gray-300);
+    border-radius: .5rem;
+    background: #fafcff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: .4rem;
+}
+.hvnh-anh-preview.has-img { border-style: solid; border-color: var(--hvnh-blue-500); background: #fff; }
+.hvnh-anh-preview img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: .35rem; }
+.hvnh-anh-preview .placeholder-text { font-size: .78rem; color: #94a3b8; text-align: center; padding: 0 .5rem; }
