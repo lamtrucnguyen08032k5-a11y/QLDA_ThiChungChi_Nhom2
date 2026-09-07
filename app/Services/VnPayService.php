@@ -37,7 +37,7 @@ class VnPayService
             'vnp_Locale' => 'vn',
             'vnp_OrderInfo' => $noiDung,
             'vnp_OrderType' => 'other',
-            'vnp_ReturnUrl' => config('services.vnpay.return_url'),
+            'vnp_ReturnUrl' => config('services.vnpay.return_url') ?: route('sinhvien.dangky.thanhtoan.vnpay.return'),
             'vnp_TxnRef' => $maGiaoDich,
         ];
 
@@ -64,16 +64,22 @@ class VnPayService
     public function xacThucChuKy(array $params): bool
     {
         $secureHash = $params['vnp_SecureHash'] ?? '';
-        unset($params['vnp_SecureHash'], $params['vnp_SecureHashType']);
-        ksort($params);
+        $vnpParams = [];
+        foreach ($params as $key => $value) {
+            if (str_starts_with($key, 'vnp_')) {
+                $vnpParams[$key] = $value;
+            }
+        }
+        unset($vnpParams['vnp_SecureHash'], $vnpParams['vnp_SecureHashType']);
+        ksort($vnpParams);
 
         $hashData = '';
-        foreach ($params as $key => $value) {
+        foreach ($vnpParams as $key => $value) {
             $hashData .= (empty($hashData) ? '' : '&') . urlencode($key) . '=' . urlencode((string) $value);
         }
 
         $checkHash = hash_hmac('sha512', $hashData, (string) config('services.vnpay.hash_secret'));
 
-        return hash_equals($checkHash, (string) $secureHash);
+        return hash_equals(strtolower($checkHash), strtolower((string) $secureHash));
     }
 }
