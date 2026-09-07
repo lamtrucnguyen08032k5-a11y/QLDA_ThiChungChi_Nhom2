@@ -28,7 +28,6 @@
             </a>
             <div class="d-flex align-items-center gap-4 flex-wrap">
                 <a class="nav-link {{ request()->routeIs('sinhvien.dashboard') ? 'active' : '' }}" href="{{ route('sinhvien.dashboard') }}">Trang chủ</a>
-                <a class="nav-link {{ request()->routeIs('sinhvien.dangky.*') ? 'active' : '' }}" href="{{ route('sinhvien.dangky.index') }}">Đăng ký thi</a>
                 <a class="nav-link {{ request()->routeIs('sinhvien.dangky.cua-toi') ? 'active' : '' }}" href="{{ route('sinhvien.dangky.cua-toi') }}">Đăng ký của tôi</a>
                 <a class="nav-link {{ request()->routeIs('sinhvien.thi.*') ? 'active' : '' }}" href="{{ route('sinhvien.thi.index') }}">Thi</a>
                 <a class="nav-link {{ request()->routeIs('sinhvien.ketqua.*') ? 'active' : '' }}" href="{{ route('sinhvien.ketqua.index') }}">Kết quả</a>
