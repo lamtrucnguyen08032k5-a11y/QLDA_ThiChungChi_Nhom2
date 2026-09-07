@@ -123,7 +123,7 @@
             </div>
 
             <div class="card mb-3">
-                <div class="card-header-blue">Thông tin ca thi (tự động, không thể chỉnh sửa)</div>
+                <div class="card-header-blue">Thông tin ca thi</div>
                 <div class="card-body">
                     <div class="row g-2 small">
                         <div class="col-md-6"><strong>Bài thi:</strong> {{ $lichthi->ten_ky_thi }}</div>
@@ -376,6 +376,38 @@ document.querySelectorAll('input[type=file][data-preview]').forEach(function (in
         });
     }
 
+    // Tự động xoá lỗi khi nhập lại các trường text/select/file
+    ['input_dan_toc', 'input_noi_sinh', 'input_dia_chi_chi_tiet'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    clearError(this, document.getElementById('err_' + id.replace('input_', '')));
+                }
+            });
+        }
+    });
+
+    var radiosGt = form ? form.querySelectorAll('input[name="gioi_tinh"]') : [];
+    radiosGt.forEach(function(r) {
+        r.addEventListener('change', function() {
+            var errGt = document.getElementById('err_gioi_tinh');
+            if (errGt) { errGt.textContent = ''; errGt.style.display = ''; }
+            radiosGt.forEach(function(item) { item.classList.remove('is-invalid'); });
+        });
+    });
+
+    ['input_anh_ho_so', 'input_anh_cccd_truoc', 'input_anh_cccd_sau'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function() {
+                if (this.files.length) {
+                    clearError(this, document.getElementById('err_' + id.replace('input_', '')));
+                }
+            });
+        }
+    });
+
     // Form submit validation (chỉ báo lỗi thiếu khi bấm nút Tiếp tục)
     if (form) {
         form.addEventListener('submit', function (e) {
@@ -425,6 +457,33 @@ document.querySelectorAll('input[type=file][data-preview]').forEach(function (in
                     errGt.textContent = 'Vui lòng chọn giới tính.';
                     errGt.style.display = 'block';
                 }
+                radiosGt.forEach(function(item) { item.classList.add('is-invalid'); });
+                isValid = false;
+            }
+
+            // Ảnh bắt buộc (Ảnh hồ sơ, CCCD trước, CCCD sau)
+            var hasDraftHoSo = {{ !empty($draft['anh_ho_so']) ? 'true' : 'false' }};
+            var hasDraftCccdTruoc = {{ !empty($draft['anh_cccd_truoc']) ? 'true' : 'false' }};
+            var hasDraftCccdSau = {{ !empty($draft['anh_cccd_sau']) ? 'true' : 'false' }};
+
+            var inputHoSo = document.getElementById('input_anh_ho_so');
+            var inputCccdTruoc = document.getElementById('input_anh_cccd_truoc');
+            var inputCccdSau = document.getElementById('input_anh_cccd_sau');
+
+            var errHoSo = document.getElementById('err_anh_ho_so');
+            var errCccdTruoc = document.getElementById('err_anh_cccd_truoc');
+            var errCccdSau = document.getElementById('err_anh_cccd_sau');
+
+            if (!hasDraftHoSo && inputHoSo && !inputHoSo.files.length) {
+                setError(inputHoSo, errHoSo, 'Vui lòng tải lên ảnh hồ sơ dự thi.');
+                isValid = false;
+            }
+            if (!hasDraftCccdTruoc && inputCccdTruoc && !inputCccdTruoc.files.length) {
+                setError(inputCccdTruoc, errCccdTruoc, 'Vui lòng tải lên ảnh CCCD mặt trước.');
+                isValid = false;
+            }
+            if (!hasDraftCccdSau && inputCccdSau && !inputCccdSau.files.length) {
+                setError(inputCccdSau, errCccdSau, 'Vui lòng tải lên ảnh CCCD mặt sau.');
                 isValid = false;
             }
 

@@ -10,13 +10,13 @@ class DangKy extends Model
     protected $table = 'dang_kys';
 
     protected $fillable = [
-        'sinh_vien_id', 'lich_thi_id', 'trang_thai', 'ly_do_tu_choi', 'ngay_duyet',
+        'sinh_vien_id', 'lich_thi_id', 'trang_thai', 'ly_do_tu_choi', 'ngay_duyet', 'nguoi_duyet_id',
         'ma_dang_ky',
         'so_dien_thoai', 'ngay_sinh', 'gioi_tinh', 'dan_toc', 'noi_sinh',
         'tinh_thanh_pho_code', 'tinh_thanh_pho_ten', 'xa_phuong_code', 'xa_phuong_ten',
         'dia_chi_chi_tiet', 'email_lien_he',
         'so_cccd', 'anh_cccd_truoc', 'anh_cccd_sau', 'anh_ho_so', 'anh_the_sv',
-        'truong_can_bo_sung', 'ly_do_bo_sung', 'han_bo_sung',
+        'truong_can_bo_sung', 'ly_do_bo_sung', 'han_bo_sung', 'ngay_bo_sung',
         'phuong_thuc_thanh_toan', 'trang_thai_thanh_toan', 'ma_giao_dich', 'so_tien', 'ngay_thanh_toan',
     ];
 
@@ -26,6 +26,7 @@ class DangKy extends Model
             'ngay_duyet' => 'datetime',
             'ngay_sinh' => 'date',
             'han_bo_sung' => 'datetime',
+            'ngay_bo_sung' => 'datetime',
             'ngay_thanh_toan' => 'datetime',
             'truong_can_bo_sung' => 'array',
         ];
@@ -45,6 +46,11 @@ class DangKy extends Model
         return $this->belongsTo(User::class, 'sinh_vien_id');
     }
 
+    public function nguoiDuyet()
+    {
+        return $this->belongsTo(User::class, 'nguoi_duyet_id');
+    }
+
     public function lichThi()
     {
         return $this->belongsTo(LichThi::class);
@@ -55,10 +61,31 @@ class DangKy extends Model
         return $this->hasOne(BaiThi::class);
     }
 
+    public function lichSuXuLy()
+    {
+        return $this->hasMany(LichSuXuLyHoSo::class, 'dang_ky_id')->orderByDesc('created_at');
+    }
+
     public function diaChiDayDu(): ?string
     {
         $phan = array_filter([$this->dia_chi_chi_tiet, $this->xa_phuong_ten, $this->tinh_thanh_pho_ten]);
         return empty($phan) ? null : implode(', ', $phan);
+    }
+
+    public function isHetHanBoSungOnline(): bool
+    {
+        if ($this->trang_thai !== 'cho_bo_sung' || ! $this->han_bo_sung) {
+            return false;
+        }
+        return now()->gt($this->han_bo_sung);
+    }
+
+    public function hanCuoiBoSungTrucTiep(): string
+    {
+        if (! $this->lichThi || ! $this->lichThi->ngay_thi) {
+            return now()->addDays(3)->format('d/m/Y');
+        }
+        return $this->lichThi->ngay_thi->copy()->subDays(1)->format('d/m/Y');
     }
 
     public function nhanTrangThaiLabel(): string
@@ -66,6 +93,7 @@ class DangKy extends Model
         return match ($this->trang_thai) {
             'cho_duyet' => 'Chờ duyệt',
             'cho_bo_sung' => 'Yêu cầu bổ sung',
+            'da_bo_sung' => 'Đã bổ sung/Chờ duyệt lại',
             'da_duyet' => 'Đã duyệt',
             'tu_choi' => 'Đã từ chối',
             'da_huy' => 'Đã huỷ',

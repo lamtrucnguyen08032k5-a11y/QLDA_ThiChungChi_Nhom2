@@ -22,6 +22,7 @@
                 <a href="{{ route('admin.khoa.index') }}" class="{{ request()->routeIs('admin.khoa.*') ? 'active' : '' }}">Quản lý Khoa</a>
                 <a href="{{ route('admin.svwhitelist.index') }}" class="{{ request()->routeIs('admin.svwhitelist.*') ? 'active' : '' }}">Kho email Sinh viên</a>
                 <a href="{{ route('admin.lichthi.index') }}" class="{{ request()->routeIs('admin.lichthi.*') ? 'active' : '' }}">Lịch thi</a>
+                <a href="{{ route('admin.dangky.danhsach') }}" class="{{ request()->routeIs('admin.dangky.*') ? 'active' : '' }}">Danh sách đăng ký thi</a>
                 <a href="{{ route('admin.dethi.index') }}" class="{{ request()->routeIs('admin.dethi.*') ? 'active' : '' }}">Kho đề thi</a>
                 <a href="{{ route('admin.tochuc.index') }}" class="{{ request()->routeIs('admin.tochuc.*') ? 'active' : '' }}">Tổ chức thi</a>
                 <a href="{{ route('admin.chamthi.tiendo') }}" class="{{ request()->routeIs('admin.chamthi.*') ? 'active' : '' }}">Tiến độ chấm</a>

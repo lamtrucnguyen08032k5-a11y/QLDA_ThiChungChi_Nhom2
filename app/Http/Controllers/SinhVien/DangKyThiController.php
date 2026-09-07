@@ -71,6 +71,17 @@ class DangKyThiController extends Controller
             return redirect()->route('sinhvien.dangky.index')->withErrors(['dangky' => $loi]);
         }
 
+        // Lưu ngay các file ảnh vừa upload vào session draft trước khi validate
+        // để khi xảy ra lỗi nhập liệu khác (ví dụ chưa đủ 18 tuổi, sđt/cccd sai), ảnh đã chọn không bao giờ bị mất
+        $draft = session('dangky_draft.' . $lichthi->id, []);
+        foreach (['anh_cccd_truoc', 'anh_cccd_sau', 'anh_ho_so', 'anh_the_sv'] as $field) {
+            if ($request->hasFile($field) && $request->file($field)->isValid()) {
+                $path = $request->file($field)->store('hoso/' . Auth::id(), 'public');
+                $draft[$field] = $path;
+            }
+        }
+        session(['dangky_draft.' . $lichthi->id => $draft]);
+
         $data = $request->validate([
             'so_dien_thoai' => ['required', 'digits:10'],
             'ngay_sinh' => ['required', 'date', 'before_or_equal:' . now()->subYears(18)->toDateString()],
@@ -238,6 +249,131 @@ class DangKyThiController extends Controller
         return view('sinhvien.dangky.cua-toi', compact('dangKys'));
     }
 
+    // Bổ sung hồ sơ theo yêu cầu của Admin
+    public function showBoSung(DangKy $dangky)
+    {
+        abort_unless($dangky->sinh_vien_id === Auth::id(), 403);
+
+        if (! in_array($dangky->trang_thai, ['cho_bo_sung', 'da_bo_sung'])) {
+            return redirect()->route('sinhvien.dangky.cua-toi')->withErrors(['dangky' => 'Hồ sơ này hiện không ở trạng thái Yêu cầu bổ sung.']);
+        }
+
+        $isExpired = $dangky->isHetHanBoSungOnline();
+        $u = Auth::user();
+
+        return view('sinhvien.dangky.bo-sung', compact('dangky', 'isExpired', 'u'));
+    }
+
+    public function luuBoSung(Request $request, DangKy $dangky)
+    {
+        abort_unless($dangky->sinh_vien_id === Auth::id(), 403);
+
+        if ($dangky->trang_thai !== 'cho_bo_sung') {
+            return redirect()->route('sinhvien.dangky.cua-toi')->withErrors(['dangky' => 'Hồ sơ này hiện không ở trạng thái Yêu cầu bổ sung.']);
+        }
+
+        // Kiểm tra thời hạn bổ sung trực tuyến (Luồng phụ: Hết hạn bổ sung trực tuyến)
+        if ($dangky->isHetHanBoSungOnline()) {
+            return back()->withErrors(['dangky' => 'Đã hết hạn bổ sung hồ sơ trực tuyến. Vui lòng bổ sung hồ sơ trực tiếp tại Phòng Khảo thí.']);
+        }
+
+        $truongBoSung = is_array($dangky->truong_can_bo_sung) ? $dangky->truong_can_bo_sung : [];
+        if (empty($truongBoSung)) {
+            return back()->withErrors(['dangky' => 'Chưa có thông tin các trường cần bổ sung từ Admin.']);
+        }
+
+        $rules = [];
+        $messages = [];
+
+        if (in_array('so_dien_thoai', $truongBoSung)) {
+            $rules['so_dien_thoai'] = ['required', 'digits:10'];
+            $messages['so_dien_thoai.required'] = 'Vui lòng nhập số điện thoại.';
+            $messages['so_dien_thoai.digits'] = 'Số điện thoại phải bao gồm đúng 10 chữ số.';
+        }
+        if (in_array('ngay_sinh', $truongBoSung)) {
+            $rules['ngay_sinh'] = ['required', 'date', 'before_or_equal:' . now()->subYears(18)->toDateString()];
+            $messages['ngay_sinh.required'] = 'Vui lòng chọn ngày sinh.';
+            $messages['ngay_sinh.before_or_equal'] = 'Thí sinh phải từ đủ 18 tuổi trở lên.';
+        }
+        if (in_array('gioi_tinh', $truongBoSung)) {
+            $rules['gioi_tinh'] = ['required', 'in:nam,nu,khac'];
+            $messages['gioi_tinh.required'] = 'Vui lòng chọn giới tính.';
+        }
+        if (in_array('dan_toc', $truongBoSung)) {
+            $rules['dan_toc'] = ['required', 'string', 'max:100'];
+            $messages['dan_toc.required'] = 'Vui lòng nhập dân tộc.';
+        }
+        if (in_array('noi_sinh', $truongBoSung)) {
+            $rules['noi_sinh'] = ['required', 'string', 'max:255'];
+            $messages['noi_sinh.required'] = 'Vui lòng nhập nơi sinh.';
+        }
+        if (in_array('so_cccd', $truongBoSung)) {
+            $rules['so_cccd'] = ['required', 'digits:12'];
+            $messages['so_cccd.required'] = 'Vui lòng nhập số CCCD.';
+            $messages['so_cccd.digits'] = 'Số CCCD phải bao gồm đúng 12 chữ số.';
+        }
+        if (in_array('anh_cccd_truoc', $truongBoSung)) {
+            $rules['anh_cccd_truoc'] = ['nullable', 'image', 'max:2048'];
+            $messages['anh_cccd_truoc.image'] = 'File tải lên phải là ảnh (jpg, png...).';
+            $messages['anh_cccd_truoc.max'] = 'Dung lượng ảnh tối đa 2MB.';
+        }
+        if (in_array('anh_cccd_sau', $truongBoSung)) {
+            $rules['anh_cccd_sau'] = ['nullable', 'image', 'max:2048'];
+            $messages['anh_cccd_sau.image'] = 'File tải lên phải là ảnh (jpg, png...).';
+            $messages['anh_cccd_sau.max'] = 'Dung lượng ảnh tối đa 2MB.';
+        }
+        if (in_array('anh_ho_so', $truongBoSung)) {
+            $rules['anh_ho_so'] = ['nullable', 'image', 'max:2048'];
+            $messages['anh_ho_so.image'] = 'File tải lên phải là ảnh (jpg, png...).';
+            $messages['anh_ho_so.max'] = 'Dung lượng ảnh tối đa 2MB.';
+        }
+        if (in_array('anh_the_sv', $truongBoSung)) {
+            $rules['anh_the_sv'] = ['nullable', 'image', 'max:2048'];
+            $messages['anh_the_sv.image'] = 'File tải lên phải là ảnh (jpg, png...).';
+            $messages['anh_the_sv.max'] = 'Dung lượng ảnh tối đa 2MB.';
+        }
+
+        $validated = $request->validate($rules, $messages);
+        $updateData = [];
+
+        foreach (['so_dien_thoai', 'ngay_sinh', 'gioi_tinh', 'dan_toc', 'noi_sinh', 'so_cccd'] as $field) {
+            if (in_array($field, $truongBoSung) && isset($validated[$field])) {
+                $updateData[$field] = $validated[$field];
+            }
+        }
+
+        foreach (['anh_cccd_truoc', 'anh_cccd_sau', 'anh_ho_so', 'anh_the_sv'] as $imgField) {
+            if (in_array($imgField, $truongBoSung) && $request->hasFile($imgField) && $request->file($imgField)->isValid()) {
+                $path = $request->file($imgField)->store('hoso/' . Auth::id(), 'public');
+                $updateData[$imgField] = $path;
+            }
+        }
+
+        if (empty($updateData)) {
+            return back()->withErrors(['dangky' => 'Vui lòng thực hiện chỉnh sửa ít nhất một thông tin cần bổ sung.']);
+        }
+
+        $trangThaiTruoc = $dangky->trang_thai;
+        $updateData['trang_thai'] = 'da_bo_sung';
+        $updateData['ngay_bo_sung'] = now();
+
+        $dangky->update($updateData);
+
+        // Ghi nhật ký xử lý hồ sơ
+        \App\Models\LichSuXuLyHoSo::create([
+            'dang_ky_id' => $dangky->id,
+            'user_id' => Auth::id(),
+            'vai_tro' => 'sinh_vien',
+            'hanh_dong' => 'bo_sung_ho_so',
+            'trang_thai_truoc' => $trangThaiTruoc,
+            'trang_thai_sau' => 'da_bo_sung',
+            'noi_dung' => 'Sinh viên đã hoàn tất cập nhật bổ sung hồ sơ trực tuyến. Trạng thái chuyển sang Đã bổ sung / Chờ duyệt lại.',
+        ]);
+
+        return redirect()->route('sinhvien.dangky.cua-toi')
+            ->with('status', 'Đã bổ sung hồ sơ thành công! Hồ sơ của bạn đã được chuyển sang trạng thái "Đã bổ sung/Chờ duyệt lại".');
+    }
+
     public function huy(DangKy $dangky)
     {
         abort_unless($dangky->sinh_vien_id === Auth::id(), 403);
@@ -246,7 +382,19 @@ class DangKyThiController extends Controller
             return back()->withErrors(['dangky' => 'Chỉ có thể huỷ đăng ký khi chưa được duyệt.']);
         }
 
+        $trangThaiTruoc = $dangky->trang_thai;
         $dangky->update(['trang_thai' => 'da_huy']);
+
+        \App\Models\LichSuXuLyHoSo::create([
+            'dang_ky_id' => $dangky->id,
+            'user_id' => Auth::id(),
+            'vai_tro' => 'sinh_vien',
+            'hanh_dong' => 'huy',
+            'trang_thai_truoc' => $trangThaiTruoc,
+            'trang_thai_sau' => 'da_huy',
+            'noi_dung' => 'Sinh viên chủ động huỷ hồ sơ đăng ký.',
+        ]);
+
         return back()->with('status', 'Đã huỷ đăng ký.');
     }
 }

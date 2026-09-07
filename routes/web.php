@@ -109,7 +109,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('de-thi/{dethi}/cau-hoi/{cauhoi}', [DeThiController::class, 'destroyQuestion'])->name('dethi.cauhoi.destroy');
 
     // M4: Đăng ký thi - duyệt/yêu cầu bổ sung/từ chối
+    Route::get('dang-ky-thi', [AdminDangKyController::class, 'danhSachLichThi'])->name('dangky.danhsach');
     Route::get('lich-thi/{lichthi}/dang-ky', [AdminDangKyController::class, 'index'])->name('dangky.index');
+    Route::get('lich-thi/{lichthi}/dang-ky/{dangky}', [AdminDangKyController::class, 'show'])->name('dangky.show');
     Route::post('lich-thi/{lichthi}/dang-ky/{dangky}/duyet', [AdminDangKyController::class, 'approve'])->name('dangky.approve');
     Route::post('lich-thi/{lichthi}/dang-ky/{dangky}/tu-choi', [AdminDangKyController::class, 'reject'])->name('dangky.reject');
     Route::post('lich-thi/{lichthi}/dang-ky/{dangky}/bo-sung', [AdminDangKyController::class, 'yeuCauBoSung'])->name('dangky.bosung');
@@ -185,6 +187,8 @@ Route::middleware(['auth', 'role:sinhvien'])->prefix('sinh-vien')->name('sinhvie
     Route::post('/dang-ky-thi/thanh-toan/{dangky}/mo-phong', [ThanhToanController::class, 'xuLyMoPhong'])->name('dangky.thanhtoan.mophong.xuly');
     Route::get('/dang-ky-thi/trang-thai/{dangky}', [DangKyThiController::class, 'buoc4'])->name('dangky.buoc4');
     Route::get('/dang-ky-cua-toi', [DangKyThiController::class, 'cuaToi'])->name('dangky.cua-toi');
+    Route::get('/dang-ky/{dangky}/bo-sung', [DangKyThiController::class, 'showBoSung'])->name('dangky.bo-sung');
+    Route::post('/dang-ky/{dangky}/bo-sung', [DangKyThiController::class, 'luuBoSung'])->name('dangky.bo-sung.luu');
     Route::post('/dang-ky/{dangky}/huy', [DangKyThiController::class, 'huy'])->name('dangky.huy');
 
     // M5
